@@ -358,6 +358,7 @@ class PC:
                 comps[-1].pins = [15,15]
                 comps[-1].len = [2,3]
                 PC.all_pc.append(comps[-1])
+                level = len(self.map) + 4
                 credit = bit_gen(random.randint(4,level+4),random.randint(4,level+4))
                 Bitcoin.users[comps[-1].ip] = Bitcoin(credit['username'],credit['password'],669)
                 print("Connect to this.")
@@ -461,13 +462,14 @@ class PC:
                             print("The password is {} digits long".format(comp.len[0]))
                         if "attempts_analyzer.exe" in self.harddrive:
                             print("You have {} attempts".format(comp.pins[0]))
+                        if self.tut and self.part == 5:
+                            self.part += 1
+                            print("Basicly try to guess the pin\nNext to each number that is close to the real one in that position you will see '#'\nNext to right number you will see '*'\nSo try to guess it")
+                        
                     while len(comp.pins) > 0:
                         v = False
                         if "pin_breaker.exe" in self.harddrive:
                             v = True
-                        if self.tut and self.part == 5:
-                            self.part += 1
-                            print("Basicly try to guess the pin\nNext to each number that is close to the real one in that position you will see '#'\nNext to right number you will see '*'\nSo try to guess it")
                         if pin(comp.pins[0],comp.len[0],v):
                             print("Good Job")
                             pn -= 1
@@ -806,16 +808,16 @@ class PC:
                 elif re.search(r"downloaded",x) != None:
                     if chance(30+ratio(6,5,len(me.map))):
                         catch(300)
-                elif re.search(r"found bitcoin password",x)) != None:
+                elif re.search(r"found bitcoin password",x) != None:
                     if chance(30+ratio(6,5,len(me.map))):
                         catch(500)
-                elif re.search(r"found bitcoin username",x)) != None:
+                elif re.search(r"found bitcoin username",x) != None:
                     if chance(20+ratio(6,5,len(me.map))):
                         catch(200)
-                 elif re.search(r"logged in.",x)) != None:
+                elif re.search(r"logged in.",x) != None:
                     if chance(10+ratio(6,5,len(me.map))):
                         catch(500)
-                 elif re.search(r"transfered",x)) != None:
+                elif re.search(r"transfered",x) != None:
                     if chance(50+ratio(6,5,len(me.map))):
                         a = x.split(" ")
                         tr = int(a[2])
@@ -834,7 +836,8 @@ class PC:
             else:
                 print("Already installed spam.")
         elif command[0] == "del" and ("log_deleter.exe" in self.harddrive or "log_deleter.exe" in me.harddrive):
-            self.logs = ""    
+            self.logs = ""
+            print("Logs deleted.")
         else:
             print("Unrecognized command.")
 class Bitcoin:
