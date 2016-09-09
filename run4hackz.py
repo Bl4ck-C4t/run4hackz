@@ -805,16 +805,16 @@ class PC:
                 elif re.search(r"downloaded",x) != None:
                     if chance(30+ratio(6,5,len(me.map))):
                         catch(300)
-                elif re.search(r"found bitcoin password",x)) != None:
+                elif re.search(r"found bitcoin password",x) != None:
                     if chance(30+ratio(6,5,len(me.map))):
                         catch(500)
-                elif re.search(r"found bitcoin username",x)) != None:
+                elif re.search(r"found bitcoin username",x) != None:
                     if chance(20+ratio(6,5,len(me.map))):
                         catch(200)
-                 elif re.search(r"logged in.",x)) != None:
+                elif re.search(r"logged in.",x) != None:
                     if chance(10+ratio(6,5,len(me.map))):
                         catch(500)
-                 elif re.search(r"transfered",x)) != None:
+                elif re.search(r"transfered",x) != None:
                     if chance(50+ratio(6,5,len(me.map))):
                         a = x.split(" ")
                         tr = int(a[2])
