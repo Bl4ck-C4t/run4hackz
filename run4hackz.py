@@ -44,26 +44,30 @@ def pin(attempts,length,breaker=False):
     else:
         print("You failed the pin was "+ pin)
         return False
-    
+def check(ls):
+    if (ls[0][0] == ls[1][1] and ls[1][1] == ls[2][2]) or (ls[0][2] == ls[1][1] and ls[1][1] == ls[2][0]):
+        return True
+    return False
 def magic_square(gone,hard=2):
     square = [[0 for c in range(3)] for b in range(3)]
-    sm = random.randint(1,hard)
-    form = ["12","33","21","31","22","13","23","11","32"]
-    for seq in form:
-        y = int(seq[0])-1
-        x = int(seq[1])-1
-        del square[y][x]
-        square[y].insert(x,sm)
-        sm += 1
-    adf = copy.deepcopy(square)
-    for cac in range(gone):
-        x = random.randint(0,2)
-        y = random.randint(0,2)
-        while square[y][x] == "?":
+    while check(square):
+        square = [[0 for c in range(3)] for b in range(3)]
+        sm = random.randint(1,hard)
+        form = ["12","33","21","31","22","13","23","11","32"]
+        for seq in form:
+            y = int(seq[0])-1
+            x = int(seq[1])-1
+            square[y][x] = sm
+            sm += 1
+        adf = copy.deepcopy(square)
+        for cac in range(gone):
             x = random.randint(0,2)
             y = random.randint(0,2)
-        del square[y][x]
-        square[y].insert(x,"?")
+            while square[y][x] == "?":
+                x = random.randint(0,2)
+                y = random.randint(0,2)
+            square[y][x] = "?"
+
     print("Example '2,3,4' - replaces the number at second row third colomun with the number 4")
     while True:
         for x in square:
@@ -87,7 +91,10 @@ def magic_square(gone,hard=2):
         square[row].insert(col,num)
 
         
-        
+def catch(charge):
+    c = Bitcoin.users[me.ip]
+    c.balance -= charge
+    print("You were caught hacking and were charged with {}$".format(charge))
 
 def bit_guess(attempts,search,tp):
     put = False
@@ -499,7 +506,7 @@ class PC:
                             if self.tut and self.part == 16:
                                 self.part += 1
                                 print("To solve this the 3 numbers from each row,colomun and diagonal should have the same sum.")
-                            if magic_square(nope(ratio(9,5,len(self.map))),random.randint(1,nope(ratio(14,4,len(self.map))))) or "firewall_disable.exe" in self.harddrive:
+                            if magic_square(random.randint(1,4),nope(ratio(6,4,len(self.map)))) or "firewall_disable.exe" in self.harddrive:
                                 print("""
                          The computer has an inactive Firewall.
                          
@@ -735,6 +742,7 @@ class PC:
             if self.tut and self.part == 7:
                 self.part += 1
                 print("Ok whatever you select the method is identical\nYou will get 4 usernames/passwords one of them is the real one\nYou have two attempts after that the username/password resets\nBut you can still try to crack it again\nAfter you got the user and pass use 'access [username] [password]'")
+                print("Also remember that you can use 'notes' to write down important info.")
             choice = input("Type 'u' to start hacking the username 'p' to start with the password and 'c' to cancel: ")
             put = False
             if choice == "u":
@@ -787,6 +795,30 @@ class PC:
             Instance.i = last_ip[-1]
             del last_ip[-1]
             print("Disconnected.")
+            log = self.logs
+            log = log.split("\n")[:-1]
+            for x in log:
+                ch = re.search(r"Connected",x)
+                if ch != None:
+                    if chance(10+ratio(6,5,len(me.map))):
+                        catch(300)
+                elif re.search(r"downloaded",x) != None:
+                    if chance(30+ratio(6,5,len(me.map))):
+                        catch(300)
+                elif re.search(r"found bitcoin password",x)) != None:
+                    if chance(30+ratio(6,5,len(me.map))):
+                        catch(500)
+                elif re.search(r"found bitcoin username",x)) != None:
+                    if chance(20+ratio(6,5,len(me.map))):
+                        catch(200)
+                 elif re.search(r"logged in.",x)) != None:
+                    if chance(10+ratio(6,5,len(me.map))):
+                        catch(500)
+                 elif re.search(r"transfered",x)) != None:
+                    if chance(50+ratio(6,5,len(me.map))):
+                        a = x.split(" ")
+                        tr = int(a[2])
+                        catch(int((tr*60)/100))
             if self.tut and self.part == 11:
                 self.part += 1
                 me.part = self.part
