@@ -100,14 +100,18 @@ def bit_guess(attempts,search,tp):
     put = False
     print("It is one of those: ")
     ch = 60
-    for x in range(0,3):
+    for x in range(2):
         if(chance(ch)):
             c = bit_gen(len(search),len(search))
             print(c[tp])
-        elif not(put):
-            put = True
-            ch = 100
-            print(search)
+        else:
+            if not(put):
+                put = True
+                ch = 100
+                print(search)
+            else:
+                c = bit_gen(len(search),len(search))
+                print(c[tp])
     if put:
         c = bit_gen(len(search),len(search))
         print(c[tp])
@@ -184,9 +188,9 @@ def nope(number):
     if number == 0:
         return 1
     return number
-def access(ip,user,password):
+def access(ip,usr,passw):
     a = Bitcoin.users[ip]
-    if a.user == user and a.password == password:
+    if a.user == usr and a.password == passw:
         return True
 def give():
     hard = []
@@ -305,6 +309,9 @@ class PC:
             self.harddrive.append("fire_disc.exe")
             self.see = True
             print("Welcome dev!!")
+        elif command[0] == "money":
+            Bitcoin.users[self.ip].balance += 100000
+            print("Money added.")
         elif command[0] == "ls" or command[0] == "dir":
             if self.harddrive == []:
                 print("No files")
@@ -373,9 +380,8 @@ class PC:
                     money = "balance: " + str(Bitcoin.users[comp[1].ip].balance)
                 if self.see or "proxy_disc.exe" in self.harddrive:
                     see = "Proxy: " + str(comp[1].proxy)
-                    fs = "Firewall: " + str(comp[1].firewall)
                 if self.see or "fire_disc.exe" in self.harddrive:
-                    firewall = "Firewall: " + str(comp[1].firewall)
+                    fs = "Firewall: " + str(comp[1].firewall)
                 print("{}. {} {} {} {} {}".format(comp[0],comp[1].ip,files,money,see,fs))
             if self.tut and self.part == 4:
                 self.part += 1
@@ -408,9 +414,9 @@ class PC:
                         self.part += 1
                         print("Pretty self-explanatory you will bypass the firewall if you have enough shells opened\nThere are some programs that will help you to see the max of the proxy")
                     use = input("'b' to try to bypass, 'c' - to cancel: ")
-                    if "proxy_disable" in self.harddrive:
+                    if "proxy_disable.exe" in self.harddrive:
                         comp.proxy = False
-                        print("Disabled proxy via proxy_disabl.exe")
+                        print("Disabled proxy via proxy_disable.exe")
                     if use != "c":
                         if over >= comp.overload:
                             print("""                                                     
@@ -432,7 +438,7 @@ class PC:
                             print("Proxy bypassed with {}/{} max shells".format(over,comp.overload))
                             comp.proxy = False
                             comp.asleep = True
-                        else:
+                        elif comp.proxy:
                             print("Failed to bypass proxy.")
                             print("Disconnected.")
                             break
@@ -508,7 +514,9 @@ class PC:
                             if self.tut and self.part == 16:
                                 self.part += 1
                                 print("To solve this the 3 numbers from each row,colomun and diagonal should have the same sum.")
-                            if magic_square(random.randint(1,4),nope(ratio(6,4,len(self.map)))) or "firewall_disable.exe" in self.harddrive:
+                            if "firewall_disable.exe" in self.harddrive or magic_square(random.randint(1,4),nope(ratio(6,4,len(self.map)))):
+                                if "firewall_disable.exe" in self.harddrive:
+                                    print("Firewall disabled via firewall_disable.exe")
                                 print("""
                          The computer has an inactive Firewall.
                          
@@ -592,7 +600,7 @@ class PC:
                             acc.balance += prices[prog]
                         else:
                             print("Selling canceled.")
-                print("Now you have {}$".format(acc.balance))
+                            print("Now you have {}$".format(acc.balance))
         elif command[0] == "shell":
             if not(self.my):
                 if not(self.shell):
@@ -677,7 +685,7 @@ class PC:
                 me.harddrive.append(file)
                 self.harddrive.remove(file)
                 print(file + " successfully downloaded.")
-                self.logs += me.ip + " downloaded " + file
+                self.logs += me.ip + " downloaded " + file + "\n"
             elif not(file in self.harddrive):
                 print("File " + file + " does not exist.")
                 
@@ -720,7 +728,7 @@ class PC:
                 elif file == "pin_breaker.exe":
                     print("Shows all numbers from a pin except the last one.")
                 elif file == "proxy_over.exe":
-                    print("Show the amount of shells you need for overload a proxy.")
+                    print("Show the amount of shells you need to overload a proxy.")
                 elif file == "bit_access.exe":
                     print("Directly accesses bitcoin accounts when you run 'bit'")
                 elif file == "fire_disc.exe":
@@ -747,19 +755,16 @@ class PC:
                 print("Ok whatever you select the method is identical\nYou will get 4 usernames/passwords one of them is the real one\nYou have two attempts after that the username/password resets\nBut you can still try to crack it again\nAfter you got the user and pass use 'access [username] [password]'")
                 print("Also remember that you can use 'notes' to write down important info.")
             choice = input("Type 'u' to start hacking the username 'p' to start with the password and 'c' to cancel: ")
-            put = False
             if choice == "u":
-                user = Bitcoin.users[self.ip].user
                 if not(bit_guess(2,user,"username")):
                     c = bit_gen(len(user),len(password))
                     Bitcoin.users[self.ip].user = c['username']
                 else:
                     self.logs += me.ip + " found bitcoin username\n"
             elif choice == "p":
-                password = Bitcoin.users[self.ip].password
                 if not(bit_guess(2,password,"password")):
                     c = bit_gen(len(user),len(password))
-                    Bitcoin.users[self.ip].user = c['password']
+                    Bitcoin.users[self.ip].password = c['password']
                 else:
                     self.logs += me.ip + " found bitcoin password\n"
         elif command[0] == "access" and not(self.my):
@@ -803,25 +808,25 @@ class PC:
             for x in log:
                 ch = re.search(r"Connected",x)
                 if ch != None:
-                    if chance(10+ratio(6,5,len(me.map))):
+                    if chance(5+ratio(6,3,len(me.map))):
                         catch(300)
                 elif re.search(r"downloaded",x) != None:
-                    if chance(30+ratio(6,5,len(me.map))):
+                    if chance(10+ratio(6,3,len(me.map))):
                         catch(300)
                 elif re.search(r"found bitcoin password",x) != None:
-                    if chance(30+ratio(6,5,len(me.map))):
-                        catch(500)
+                    if chance(30+ratio(6,3,len(me.map))):
+                        catch(200)
                 elif re.search(r"found bitcoin username",x) != None:
-                    if chance(20+ratio(6,5,len(me.map))):
+                    if chance(20+ratio(6,3,len(me.map))):
                         catch(200)
                 elif re.search(r"logged in.",x) != None:
-                    if chance(10+ratio(6,5,len(me.map))):
-                        catch(500)
+                    if chance(10+ratio(6,3,len(me.map))):
+                        catch(300)
                 elif re.search(r"transfered",x) != None:
-                    if chance(50+ratio(6,5,len(me.map))):
-                        a = x.split(" ")
-                        tr = int(a[2])
-                        catch(int((tr*60)/100))
+                    a = x.split(" ")
+                    tr = int(a[2])
+                    if chance(10+int(((tr*5)/100))+ratio(6,3,len(me.map))):
+                        catch(int((tr*30)/100))
             if self.tut and self.part == 11:
                 self.part += 1
                 me.part = self.part
