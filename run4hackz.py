@@ -2,16 +2,10 @@ import random
 import re
 import copy
 from database import *
-try:
-    f = open("db.txt","r")
-    if f.read() != "":
-        spam = get("Player","spam")
-        over = get("Player","over")
-    else:
-        spam = 0
-        over = 0
-    f.close()
-except:
+if exists():
+    spam = get("Player","spam")
+    over = get("Player","over")
+else:
     spam = 0
     over = 0
 last_ip = []
@@ -467,6 +461,10 @@ class PC:
                                     comp.proxy = True
                                     comp.asleep = False
                                     break
+                                
+                    else:
+                        print("Disconnected.")
+                        break
                 if not(comp.proxy):
                     if self.tut and self.part == 15:
                         self.part += 1
@@ -691,7 +689,7 @@ class PC:
                    print("PROXY DISABLE")
         elif command[0][0] == "g" and not(self.my):
             file = command[1]
-            if not(file) in me.harddrive and file in self.harddrive:
+            if file in self.harddrive:
                 me.harddrive.append(file)
                 self.harddrive.remove(file)
                 print(file + " successfully downloaded.")
@@ -863,7 +861,7 @@ class PC:
             delete()
             upload("Player","harddrive",self.harddrive)
             upload("Player","map",self.map)
-            upload("Player","bash",self.bash)
+            upload("Player","bash",self.bash[:-2])
             upload("Player","ip",self.ip)
             upload("Player","balance",Bitcoin.users[self.ip].balance)
             upload("Player","spam",spam)
@@ -896,9 +894,18 @@ class Bitcoin:
         self.user = username
         self.password = password
         self.balance = balance
-try:
-    f = open("db.txt","r")
-    if f.read() != "":
+if exists():
+    ch = input("Do you want to load previous save y/n?: ")
+    if ch == "n":
+        ch = input("Warning! Starting a new game will delete all your progress y/n?: ")
+        if ch == "y":
+            ch = "n"
+    if ch == "y":
+        pl = get("Player")
+        me = PC(pl["harddrive"],True,pl["bash"])
+        me.map = pl["map"]
+        me.ip = pl["ip"]
+        Bitcoin.users[me.ip] = Bitcoin(me.bash,bit_gen(6,8)['password'],pl["balance"])
         c = get()
         for x in c.keys():
             if x != "Player":
@@ -921,20 +928,15 @@ try:
                 cmp.accessed = x["accessed"]
                 cmp.trojan = x["trojan"]
                 PC.all_pc.append(cmp)
-            else:
-                pl = get(x)
-                me = PC(pl["harddrive"],True,pl["bash"])
-                me.map = pl["map"]
-                me.ip = pl["ip"]
-                Bitcoin.users[me.ip] = Bitcoin(me.bash,bit_gen(6,8)['password'],pl["balance"])
+                
     else:
+        delete()
+        print("Starting new game...")
         bash = input("Enter your name: ")
         print("Type 'help' to see commands and 'tut' for tutorial.")
         me = PC(["length_scan.exe"],True, bash)
         Bitcoin.users[me.ip] = Bitcoin(bash,bit_gen(6,8)['password'],0)
-    f.close()
-
-except:
+else:
     bash = input("Enter your name: ")
     print("Type 'help' to see commands and 'tut' for tutorial.")
     me = PC(["length_scan.exe"],True, bash)
