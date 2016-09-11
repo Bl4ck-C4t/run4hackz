@@ -932,6 +932,7 @@ try:
         print("Type 'help' to see commands and 'tut' for tutorial.")
         me = PC(["length_scan.exe"],True, bash)
         Bitcoin.users[me.ip] = Bitcoin(bash,bit_gen(6,8)['password'],0)
+    f.close()
 
 except:
     bash = input("Enter your name: ")
