@@ -2,9 +2,19 @@ import random
 import re
 import copy
 from database import *
-spam = 0
+try:
+    f = open("db.txt","r")
+    if f.read() != "":
+        spam = get("Player","spam")
+        over = get("Player","over")
+    else:
+        spam = 0
+        over = 0
+    f.close()
+except:
+    spam = 0
+    over = 0
 last_ip = []
-over = 0
 def pin(attempts,length,breaker=False):
     in_at = attempts
     pin = ""
@@ -288,7 +298,7 @@ class PC:
         self.map = []
         self.my = my
         self.logs = ""
-        self.help = "'access [username] [password] to access bitcoin account(unlocks commands 'b' and 'trans [money_amount]')'\n'trans [money_amount]' to transfer money when accessed account\n'exit' to return to localhost\n'shop' to purchase programs\n'shell' to open shell on target 'help shell' for more info\n'proxy' to disable proxy\n'dis' to return to previous computer\n'ls' - to list files in harddrive\n'(b)alance' to see your balance\n'(l)ogs' - to see logfile\n'(f)ind' to search for computers to hack\n'(m)ap' to see hacked computers and access them\n'(g)et [file]' to download file\n'(h)elp <program(optional)>' to display help or help with a specific program\n'notes' to add notes"
+        self.help = "'(q)uit to exit the game'\n(s)ave to save the game'\n'access [username] [password] to access bitcoin account(unlocks commands 'b' and 'trans [money_amount]')'\n'trans [money_amount]' to transfer money when accessed account\n'exit' to return to localhost\n'shop' to purchase programs\n'shell' to open shell on target 'help shell' for more info\n'proxy' to disable proxy\n'dis' to return to previous computer\n'ls' - to list files in harddrive\n'(b)alance' to see your balance\n'(l)ogs' - to see logfile\n'(f)ind' to search for computers to hack\n'(m)ap' to see hacked computers and access them\n'(g)et [file]' to download file\n'(h)elp <program(optional)>' to display help or help with a specific program\n'notes' to add notes"
         self.bash = bash + "> "
     def execute(self,command):
         global spam
@@ -843,6 +853,41 @@ class PC:
         elif command[0] == "del" and ("log_deleter.exe" in self.harddrive or "log_deleter.exe" in me.harddrive):
             self.logs = ""
             print("Logs deleted.")
+        elif command[0][0] == "q":
+            print("Warning any unsaved progress will be lost(use '(s)ave' to save)")
+            end = input("Do you really want to exit y/n?: ")
+            if end == "y":
+                exit()
+        elif command[0][0] == "s":
+            print("Game saved.")
+            delete()
+            upload("Player","harddrive",self.harddrive)
+            upload("Player","map",self.map)
+            upload("Player","bash",self.bash)
+            upload("Player","ip",self.ip)
+            upload("Player","balance",Bitcoin.users[self.ip].balance)
+            upload("Player","spam",spam)
+            upload("Player","over",over)
+            upload("Player","my",True)
+            for x in PC.all_pc:
+                ip = x.ip
+                upload(ip,"harddrive",x.harddrive)
+                upload(ip,"map",x.map)
+                upload(ip,"bash",x.bash)
+                upload(ip,"my",False)
+                upload(ip,"balance",Bitcoin.users[ip].balance)
+                upload(ip,"firewall",x.firewall)
+                upload(ip,"proxy",x.proxy)
+                upload(ip,"shell",x.shell)
+                upload(ip,"spam",x.spam)
+                upload(ip,"len",x.len)
+                upload(ip,"pins",x.pins)
+                upload(ip,"overload",x.overload)
+                upload(ip,"coms",x.coms)
+                upload(ip,"attempts",x.attempts)
+                upload(ip,"accessed",x.accessed)
+                upload(ip,"trojan",x.trojan)
+                upload(ip,"ip",ip)
         else:
             print("Unrecognized command.")
 class Bitcoin:
@@ -851,11 +896,48 @@ class Bitcoin:
         self.user = username
         self.password = password
         self.balance = balance
+try:
+    f = open("db.txt","r")
+    if f.read() != "":
+        c = get()
+        for x in c.keys():
+            if x != "Player":
+                x = get(x)
+                level = len(me.map) + 4
+                cmp = PC(x["harddrive"],False,"root")
+                cmp.map = x["map"]
+                cmp.ip = x["ip"]
+                credit = bit_gen(random.randint(4,level+4),random.randint(4,level+4))
+                Bitcoin.users[cmp.ip] = Bitcoin(credit['username'],credit['password'],x["balance"])
+                cmp.firewall = x["firewall"]
+                cmp.proxy = x["proxy"]
+                cmp.shell = x["shell"]
+                cmp.spam = x["spam"]
+                cmp.len = x["len"]
+                cmp.pins = x["pins"]
+                cmp.overload = x["overload"]
+                cmp.coms = x["coms"]
+                cmp.attempts = x["attempts"]
+                cmp.accessed = x["accessed"]
+                cmp.trojan = x["trojan"]
+                PC.all_pc.append(cmp)
+            else:
+                pl = get(x)
+                me = PC(pl["harddrive"],True,pl["bash"])
+                me.map = pl["map"]
+                me.ip = pl["ip"]
+                Bitcoin.users[me.ip] = Bitcoin(me.bash,bit_gen(6,8)['password'],pl["balance"])
+    else:
+        bash = input("Enter your name: ")
+        print("Type 'help' to see commands and 'tut' for tutorial.")
+        me = PC(["length_scan.exe"],True, bash)
+        Bitcoin.users[me.ip] = Bitcoin(bash,bit_gen(6,8)['password'],0)
 
-bash = input("Enter your name: ")
-print("Type 'help' to see commands and 'tut' for tutorial.")
-me = PC(["length_scan.exe"],True, bash)
-Bitcoin.users[me.ip] = (Bitcoin(bash,bit_gen(6,8)['password'],0))
+except:
+    bash = input("Enter your name: ")
+    print("Type 'help' to see commands and 'tut' for tutorial.")
+    me = PC(["length_scan.exe"],True, bash)
+    Bitcoin.users[me.ip] = Bitcoin(bash,bit_gen(6,8)['password'],0)
 while True:
     i = Instance.i
     if i == 0:
