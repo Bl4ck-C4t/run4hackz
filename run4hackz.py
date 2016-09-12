@@ -338,6 +338,30 @@ class PC:
         elif command[0] == "exit":
             Instance.i = 0
             last_ip = []
+            log = self.logs
+            log = log.split("\n")[:-1]
+            for x in log:
+                ch = re.search(r"Connected",x)
+                if ch != None:
+                    if chance(5+ratio(6,3,len(me.map))):
+                        catch(300)
+                elif re.search(r"downloaded",x) != None:
+                    if chance(10+ratio(6,3,len(me.map))):
+                        catch(300)
+                elif re.search(r"found bitcoin password",x) != None:
+                    if chance(30+ratio(6,3,len(me.map))):
+                        catch(200)
+                elif re.search(r"found bitcoin username",x) != None:
+                    if chance(20+ratio(6,3,len(me.map))):
+                        catch(200)
+                elif re.search(r"logged in.",x) != None:
+                    if chance(10+ratio(6,3,len(me.map))):
+                        catch(300)
+                elif re.search(r"transfered",x) != None:
+                    a = x.split(" ")
+                    tr = int(a[2])
+                    if chance(10+int(((tr*5)/100))+ratio(6,3,len(me.map))):
+                        catch(int((tr*30)/100))
             print("Disconected")
         elif command[0] == "notes":
             if self.my:
@@ -857,35 +881,41 @@ class PC:
             if end == "y":
                 exit()
         elif command[0][0] == "s":
-            print("Game saved.")
+            print("Saving...")
             delete()
-            upload("Player","harddrive",self.harddrive)
-            upload("Player","map",self.map)
-            upload("Player","bash",self.bash[:-2])
-            upload("Player","ip",self.ip)
-            upload("Player","balance",Bitcoin.users[self.ip].balance)
-            upload("Player","spam",spam)
-            upload("Player","over",over)
-            upload("Player","my",True)
+            dat = {}
+            dat["Player"] = {}
+            dat["Player"]["harddrive"] = self.harddrive
+            dat["Player"]["map"] = self.map
+            dat["Player"]["bash"] = self.bash[:-2]
+            dat["Player"]["ip"] = self.ip
+            dat["Player"]["balance"] = Bitcoin.users[self.ip].balance
+            dat["Player"]["spam"] = spam
+            dat["Player"]["over"] = over
+            dat["Player"]["my"] = True
             for x in PC.all_pc:
                 ip = x.ip
-                upload(ip,"harddrive",x.harddrive)
-                upload(ip,"map",x.map)
-                upload(ip,"bash",x.bash)
-                upload(ip,"my",False)
-                upload(ip,"balance",Bitcoin.users[ip].balance)
-                upload(ip,"firewall",x.firewall)
-                upload(ip,"proxy",x.proxy)
-                upload(ip,"shell",x.shell)
-                upload(ip,"spam",x.spam)
-                upload(ip,"len",x.len)
-                upload(ip,"pins",x.pins)
-                upload(ip,"overload",x.overload)
-                upload(ip,"coms",x.coms)
-                upload(ip,"attempts",x.attempts)
-                upload(ip,"accessed",x.accessed)
-                upload(ip,"trojan",x.trojan)
-                upload(ip,"ip",ip)
+                dat[ip] = {}
+                dat[ip]["harddrive"] = x.harddrive
+                dat[ip]["map"] = x.map
+                dat[ip]["bash"] = x.bash
+                dat[ip]["my"] = False
+                dat[ip]["balance"] = Bitcoin.users[ip].balance
+                dat[ip]["firewall"] = x.firewall
+                dat[ip]["proxy"] = x.proxy
+                dat[ip]["shell"] = x.shell
+                dat[ip]["spam"] = x.spam
+                dat[ip]["len"] = x.len
+                dat[ip]["pins"] = x.pins
+                dat[ip]["overload"] = x.overload
+                dat[ip]["coms"] = x.coms
+                dat[ip]["attempts"] = x.attempts
+                dat[ip]["accessed"] = x.accessed
+                dat[ip]["trojan"] = x.trojan
+                dat[ip]["ip"] = ip
+            f = open("db.txt","w")
+            f.write(str(dat))
+            f.close()
         else:
             print("Unrecognized command.")
 class Bitcoin:
