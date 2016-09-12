@@ -198,35 +198,36 @@ def access(ip,usr,passw):
         return True
 def give():
     hard = []
-    if chance(60):
+    mx = random.randint(0,ratio(2,3,len(me.map)))
+    if chance(60) and len(hard) <= mx:
         hard.append("length_scan.exe")
-    if chance(20):
+    if chance(20) and len(hard) <= mx:
         hard.append("attempts_analyzer.exe")
-    if chance(30):
+    if chance(30) and len(hard) <= mx:
         hard.append("bitcoin_cracker.exe")
-    if chance(30):
+    if chance(30) and len(hard) <= mx:
         hard.append("chain_spam.exe")
-    if chance(10):
+    if chance(10) and len(hard) <= mx:
         hard.append("trojan.exe")
-    if chance(15):
+    if chance(15) and len(hard) <= mx:
         hard.append("file_analyzer.exe")
-    if chance(8):
+    if chance(8) and len(hard) <= mx:
         hard.append("balance_analyzer.exe")
-    if chance(5):
+    if chance(5) and len(hard) <= mx:
          hard.append("log_deleter.exe")
-    if chance(11):
+    if chance(11) and len(hard) <= mx:
         hard.append("proxy_disc.exe")
-    if chance(2):
+    if chance(2) and len(hard) <= mx:
         hard.append("proxy_disable.exe")
-    if chance(2):
+    if chance(2) and len(hard) <= mx:
         hard.append("pin_breaker.exe")
-    if chance(15):
+    if chance(15) and len(hard) <= mx:
         hard.append("proxy_over.exe")
-    if chance(5):
+    if chance(5) and len(hard) <= mx:
         hard.append("bit_access.exe")
-    if chance(20):
+    if chance(20) and len(hard) <= mx:
         hard.append("fire_disc.exe")
-    if chance(3):
+    if chance(3) and len(hard) <= mx:
         hard.append("firewall_disable.exe")
     return hard
 def comp_gen():
@@ -253,7 +254,7 @@ def comp_gen():
             comps[-1].coms = random.randint(comps[-1].overload+3,(comps[-1].overload+10))
         if level >= 6 and chance(30):
             comps[-1].firewall = True
-        balance = random.randint(0,ratio(9,1000,level-2))
+        balance = random.randint(0,ratio(5,1000,level-2))
         credit = bit_gen(random.randint(4,level+4),random.randint(4,level+4))
         Bitcoin.users[comps[-1].ip] = Bitcoin(credit['username'],credit['password'],balance)
     PC.all_pc += comps
@@ -595,13 +596,13 @@ class PC:
                 print("Now exit the shop and check your balance.")
             prices = {"firewall_disable.exe":3450,"fire_disc.exe":700,"bit_access.exe":3000,"proxy_over.exe":2300,"length_scan.exe":10,"attempts_analyzer.exe":200,"bitcoin_cracker.exe":500,"chain_spam.exe":700,"trojan.exe":1220,"file_analyzer.exe":150,"balance_analyzer.exe":1000,"log_deleter.exe":1500,"proxy_disc.exe":1080,"proxy_disable.exe":2000,"pin_breaker.exe":4000}
             inc = ratio(4,100,len(self.map))
-            for x in prices.keys():
-                prices[x] += int(inc)
             acc = Bitcoin.users[self.ip]
             what = ""
             while what != "e":
                 what = input("(b)uy or (s)ell 'e' to exit?: ")
                 if what[0] == "b":
+                    for x in prices.keys():
+                        prices[x] += int(inc)
                     print("You have {}$".format(acc.balance))
                     for x in enumerate(prices.keys(),start=1):
                         print("{}. {} : {}$".format(x[0],x[1],prices[x[1]]))
