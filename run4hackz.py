@@ -595,7 +595,7 @@ class PC:
                 print("You can learn what each program does by using 'help [program_name]'")
                 print("Now exit the shop and check your balance.")
             prices = {"firewall_disable.exe":3450,"fire_disc.exe":700,"bit_access.exe":3000,"proxy_over.exe":2300,"length_scan.exe":10,"attempts_analyzer.exe":200,"bitcoin_cracker.exe":500,"chain_spam.exe":700,"trojan.exe":1220,"file_analyzer.exe":150,"balance_analyzer.exe":1000,"log_deleter.exe":1500,"proxy_disc.exe":1080,"proxy_disable.exe":2000,"pin_breaker.exe":4000}
-            inc = ratio(4,100,len(self.map))
+            inc = ratio(4,600,len(self.map))
             acc = Bitcoin.users[self.ip]
             what = ""
             while what != "e":
