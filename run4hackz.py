@@ -254,8 +254,8 @@ def comp_gen():
             comps[-1].coms = random.randint(comps[-1].overload+3,(comps[-1].overload+10))
         if level >= 6 and chance(30):
             comps[-1].firewall = True
-        balance = random.randint(0,ratio(5,1000,level-2))
-        credit = bit_gen(random.randint(4,level+4),random.randint(4,level+4))
+        balance = random.randint(ratio(4,200,level-4),ratio(5,1000,level-2))
+        credit = bit_gen(random.randint(4,level),random.randint(4,level))
         Bitcoin.users[comps[-1].ip] = Bitcoin(credit['username'],credit['password'],balance)
     PC.all_pc += comps
     return comps
@@ -602,7 +602,7 @@ class PC:
                 what = input("(b)uy or (s)ell 'e' to exit?: ")
                 if what[0] == "b":
                     for x in prices.keys():
-                        prices[x] += int(inc)
+                        prices[x] += inc
                     print("You have {}$".format(acc.balance))
                     for x in enumerate(prices.keys(),start=1):
                         print("{}. {} : {}$".format(x[0],x[1],prices[x[1]]))
@@ -621,6 +621,8 @@ class PC:
                         else:
                             print("Purchase canceled.")
                 if what[0] == "s":
+                    for x in prices.keys():
+                        prices[x] -= int((prices[x]*ratio(4,10,len(self.map)))/100)
                     print("You have {}$".format(acc.balance))
                     print("Available programs for you to sell.")
                     for x in enumerate(self.harddrive,start=1):
