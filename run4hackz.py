@@ -467,6 +467,7 @@ class PC:
                             print("Proxy bypassed with {}/{} max shells".format(over,comp.overload))
                             comp.proxy = False
                             comp.asleep = True
+                            last_ip.append(self.ip)
                         elif comp.proxy:
                             print("Failed to bypass proxy.")
                             print("Disconnected.")
@@ -919,6 +920,7 @@ class PC:
             f = open("db.txt","w")
             f.write(str(dat))
             f.close()
+            print("Game saved.")
         else:
             print("Unrecognized command.")
 class Bitcoin:
@@ -928,11 +930,14 @@ class Bitcoin:
         self.password = password
         self.balance = balance
 if exists():
+    print("Money on save: {}$".format(get("Player","balance")))
     ch = input("Do you want to load previous save y/n?: ")
     if ch == "n":
         ch = input("Warning! Starting a new game will delete all your progress y/n?: ")
         if ch == "y":
             ch = "n"
+        elif ch == "n":
+            ch = "y"
     if ch == "y":
         pl = get("Player")
         me = PC(pl["harddrive"],True,pl["bash"])
