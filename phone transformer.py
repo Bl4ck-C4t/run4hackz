@@ -1,0 +1,11 @@
+import re
+file = open("run4hackz.py","r")
+txt = file.read()
+file.close()
+f = open("run4hackz.py","w")
+txt = re.sub(r"db.txt","/storage/emulated/0/games/db.txt",txt)
+f.truncate()
+f.write(txt)
+f.close()
+print("Modified to phone version.")
+input("Press any key to exit...")
