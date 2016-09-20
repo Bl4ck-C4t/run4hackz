@@ -7,6 +7,8 @@ if patch == "":
     patch = "/storage/emulated/0/games/db.txt"
 elif patch[-3:] != "txt":
     patch += "db.txt"
+if patch[-6:] != "db.txt":
+    txt = re.sub(r"get(","get(file=" + patch+ ",",txt)
 txt = re.sub(r"db.txt",patch,txt)
 file.truncate()
 file.write(txt)
