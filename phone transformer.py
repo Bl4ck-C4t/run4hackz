@@ -1,12 +1,12 @@
 import re
-file = open("run4hackz.py","r")
+file = open("run4hackz.py","r+")
 txt = file.read()
+patch = input("Enter full patch default(/storage/emulated/0/games/db.txt): ")
+if patch == "":
+    patch = "/storage/emulated/0/games/db.txt"
+txt = re.sub(r"db.txt",patch,txt)
+file.truncate()
+file.write(txt)
 file.close()
-f = open("run4hackz.py","w")
-path = input("Enter full path to file: ")
-txt = re.sub(r"db.txt",path,txt)
-f.truncate()
-f.write(txt)
-f.close()
 print("Modified to phone version.")
 input("Press any key to exit...")
