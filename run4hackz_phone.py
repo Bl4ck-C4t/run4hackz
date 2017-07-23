@@ -12,6 +12,10 @@ def save_functions(file="/storage/emulated/0/games/db.txt"):
     def exists():
         try:
             f = open(file, "r")
+            if f.read() == "":
+                f.close()
+                return False
+            f.close()
             return True
         except:
             return False
@@ -372,39 +376,21 @@ def access(ip,usr,passw):
     if a.user == usr and a.password == passw:
         return True
 def give():
+    global me
     hard = []
+    chances = File.rarities.keys()
     mx = random.randint(0,ratio(2,3,len(me.map)))
-    if chance(60) and len(hard) <= mx:
-        hard.append("length_scan.exe")
-    if chance(20) and len(hard) <= mx:
-        hard.append("attempts_analyzer.exe")
-    if chance(30) and len(hard) <= mx:
-        hard.append("bitcoin_cracker.exe")
-    if chance(30) and len(hard) <= mx:
-        hard.append("chain_spam.exe")
-    if chance(10) and len(hard) <= mx:
-        hard.append("trojan.exe")
-    if chance(15) and len(hard) <= mx:
-        hard.append("file_analyzer.exe")
-    if chance(8) and len(hard) <= mx:
-        hard.append("balance_analyzer.exe")
-    if chance(5) and len(hard) <= mx:
-         hard.append("log_deleter.exe")
-    if chance(11) and len(hard) <= mx:
-        hard.append("proxy_disc.exe")
-    if chance(2) and len(hard) <= mx:
-        hard.append("proxy_disable.exe")
-    if chance(2) and len(hard) <= mx:
-        hard.append("pin_breaker.exe")
-    if chance(15) and len(hard) <= mx:
-        hard.append("proxy_over.exe")
-    if chance(5) and len(hard) <= mx:
-        hard.append("bit_access.exe")
-    if chance(20) and len(hard) <= mx:
-        hard.append("fire_disc.exe")
-    if chance(3) and len(hard) <= mx:
-        hard.append("firewall_disable.exe")
+    i = 0
+    while i < mx and random.randint(0, 60) <= 60:
+        for ch in chances:
+            if chance(ch):
+                rarity = File.rarities[ch]
+                to_chose = filter(lambda x: x.rarity == rarity,File.all_files)
+                file = random.choice(to_chose)
+                hard.append(file)
+                i += 1
     return hard
+
 def comp_gen():
     comps = []
     level = len(me.map) + 4
@@ -442,9 +428,14 @@ def search(ip):
     return False
 
 class File:
+    all_files = []
+    rarities = {60:10, 30:9, 20:8, 15:7, 11:6, 10:5, 8:4, 5:3, 3:2, 2:1}
     def __init__(self, name, rarity):
         self.name = name
         self.rarity = rarity
+    def __repr__(self):
+        return self.name
+
 
 class Instance:
 
@@ -511,17 +502,7 @@ class PC:
         global last_ip
         command = command.split(" ")
         if command[0] == "admin":
-            self.harddrive.append("attempts_analyzer.exe")
-            self.harddrive.append("bitcoin_cracker.exe")
-            self.harddrive.append("chain_spam.exe")
-            self.harddrive.append("trojan.exe")
-            self.harddrive.append("file_analyzer.exe")
-            self.harddrive.append("balance_analyzer.exe")
-            self.harddrive.append("log_deleter.exe")
-            self.harddrive.append("proxy_disc.exe")
-            self.harddrive.append("pin_breaker.exe")
-            self.harddrive.append("bit_access.exe")
-            self.harddrive.append("fire_disc.exe")
+            self.harddrive = File.all_files[:]
             self.see = True
             print("Welcome dev!!")
         elif command[0] == "money":
@@ -532,7 +513,7 @@ class PC:
                 print("No files")
             else:
                 for x in list(enumerate(self.harddrive,start=1)):
-                    print("{}. {}".format(x[0],x[1]))
+                    print("{}. {}[{}]".format(x[0],x[1], x[1].rarity))
         elif command[0] == "tut":
             self.tut = True
 
@@ -931,7 +912,10 @@ class Bitcoin:
         self.password = password
         self.balance = balance
 
+
 #startup sequence
+
+File.all_files = [File("length_scan.exe", 10), File("attempts_analyzer.exe", 8), File("bitcoin_cracker.exe", 9), File("chain_spam.exe", 9), File("trojan.exe", 5), File("file_analyzer.exe", 7), File("balance_analyzer.exe", 4), File("log_deleter.exe", 3), File("proxy_disc.exe", 6), File("proxy_disable.exe", 1), File("pin_breaker.exe", 1), File("proxy_over.exe", 7), File("bit_access.exe", 3), File("fire_disc.exe", 8), File("firewall_disable.exe", 2)]
 if exists():
     ls = load()
     money = ls[1][ls[0][0].ip].balance
@@ -956,12 +940,14 @@ if exists():
         print("Starting new game...")
         bash = input("Enter your name: ")
         print("Type 'help' to see commands and 'tut' for tutorial.")
-        me = PC(["length_scan.exe"],True, bash)
+        me = PC([File.all_files[0]],True, bash)
+        PC.all_pc[0].spam_c = 0
+        PC.all_pc[0].over = 0
         Bitcoin.users[me.ip] = Bitcoin(bash,bit_gen(6,8)['password'],0)
 else:
     bash = input("Enter your name: ")
     print("Type 'help' to see commands and 'tut' for tutorial.")
-    me = PC(["length_scan.exe"], True, bash)
+    me = PC([File.all_files[0]], True, bash)
     PC.all_pc[0].spam_c = 0
     PC.all_pc[0].over = 0
     Bitcoin.users[me.ip] = Bitcoin(bash,bit_gen(6,8)['password'],0)
