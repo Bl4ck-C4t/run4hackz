@@ -32,7 +32,7 @@ def save_functions(file="/storage/emulated/0/games/db.txt"):
 
     return (exists, save, load)
 
-exists, save, load = save_functions("save.pkl")
+exists, save, load = save_functions()
 
 last_ip = []
 def pin(attempts,length,breaker=False):
