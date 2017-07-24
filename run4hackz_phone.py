@@ -3,7 +3,8 @@ import re
 import copy
 import pickle
 
-#TODO add rarities
+#TODO Fix the last_ip when dealing with multiple chained disconnects
+#TODO add custom random generated names for each computer
 #TODO fix code
 
 
@@ -363,6 +364,17 @@ def bit_gen(user_max,pass_max):
         for y in range(0,pass_max):
             credit['password'] += chart[random.randint(0,len(chart)-1)]
     return credit
+
+
+def username_gen():
+    users = ["halperyon", "syphon", "viper", "KIT", "Crackerz", "Jim", "r00t", "root", "system", "server", "Microsoft_server"]
+    user = random.choice(users)
+    while user in PC.all_users:
+        user += str(random.randint(0,9))
+    PC.all_users.append(user)
+    return user
+
+
 def no(number):
     if number < 0:
         return 1
@@ -385,7 +397,7 @@ def give():
         for ch in chances:
             if chance(ch):
                 rarity = File.rarities[ch]
-                to_chose = filter(lambda x: x.rarity == rarity,File.all_files)
+                to_chose = list(filter(lambda x: x.rarity == rarity,File.all_files))
                 file = random.choice(to_chose)
                 hard.append(file)
                 i += 1
@@ -404,8 +416,16 @@ def comp_gen():
                 if ln > 4:
                     ln == 4
                 length.append(ln)
-        comps.append(PC(give(),False,"root"))
-        maps = rand_map()
+        comps.append(PC(give(),False, username_gen()))
+        maps = list(set(rand_map()))
+        for x in maps:
+            if x == comps[-1].ip:
+                maps.remove(x)
+                break
+        try:
+            maps.remove(me.ip)
+        except ValueError:
+            pass
         comps[-1].pins = pins
         comps[-1].len = length
         comps[-1].map = maps
@@ -419,6 +439,7 @@ def comp_gen():
         credit = bit_gen(random.randint(4,level),random.randint(4,level))
         Bitcoin.users[comps[-1].ip] = Bitcoin(credit['username'],credit['password'],balance)
     return comps
+
 def search(ip):
     if ip == me.ip:
         return me
@@ -426,6 +447,7 @@ def search(ip):
         if ip == comp.ip:
             return comp
     return False
+
 
 class File:
     all_files = []
@@ -438,10 +460,11 @@ class File:
 
 
 class Instance:
-
     i = 0
+
 class PC:
     all_pc = []
+    all_users = []
     def __init__(self,harddrive,my,bash):
         self.harddrive = harddrive
         self.ip = rand_ip()
@@ -470,8 +493,15 @@ class PC:
         PC.all_pc.append(self)
 
     def disconnect(self):
-        Instance.i = 0
-        last_ip = []
+        global last_ip
+        if len(last_ip) > 0:
+            del last_ip[-1]
+            if len(last_ip) > 0:
+                Instance.i = last_ip[-1]
+            else:
+                Instance.i = 0
+        else:
+            print("You can't disconnect from yourself. Use exit to close the game")
         log = self.logs
         log = log.split("\n")[:-1]
         for x in log:
@@ -498,6 +528,19 @@ class PC:
                     catch(int((tr * 30) / 100))
         print("Disconected")
 
+    def connect(self, ip):
+        last_ip.append(ip)
+        Instance.i = ip
+        print("Connected.")
+
+    def search_file(self, filename, obj=None):
+        if obj is None:
+            obj = self
+        for x in obj.harddrive:
+            if x.name == filename:
+                return x
+        return False
+
     def execute(self,command):
         global last_ip
         command = command.split(" ")
@@ -518,6 +561,12 @@ class PC:
             self.tut = True
 
         elif command[0] == "exit":
+            if len(last_ip) == 0:
+                print("Saving...")
+                save()
+                print("Game saved.")
+                print("Goodbye.")
+                exit()
             self.disconnect()
         elif command[0] == "notes":
             if self.my:
@@ -558,13 +607,13 @@ class PC:
                 files = ""
                 see = ""
                 fs = ""
-                if "file_analyzer.exe" in self.harddrive:
+                if self.search_file("file_analyzer.exe") :
                     files = "files: " + str(len(comp[1].harddrive))
-                if "balance_analyzer.exe" in self.harddrive and not(self.tut):
+                if self.search_file("balance_analyzer.exe"):
                     money = "balance: " + str(Bitcoin.users[comp[1].ip].balance)
-                if self.see or "proxy_disc.exe" in self.harddrive:
+                if self.see or self.search_file("proxy_disc.exe"):
                     see = "Proxy: " + str(comp[1].proxy)
-                if self.see or "fire_disc.exe" in self.harddrive:
+                if self.see or self.search_file("fire_disc.exe"):
                     fs = "Firewall: " + str(comp[1].firewall)
                 print("{}. {} {} {} {} {}".format(comp[0],comp[1].ip,files,money,see,fs))
             if self.tut and self.part == 4:
@@ -583,9 +632,9 @@ class PC:
                     print("The computer is protected with " + str(len(comp.pins)) + " pincodes")
                     pn = len(comp.pins)
                     if pn > 0:
-                        if "length_scan.exe" in self.harddrive and len(comp.len) > 0:
+                        if self.search_file("length_scan.exe") and len(comp.len) > 0:
                             print("The password is {} digits long".format(comp.len[0]))
-                        if "attempts_analyzer.exe" in self.harddrive:
+                        if self.search_file("attempts_analyzer.exe"):
                             print("You have {} attempts".format(comp.pins[0]))
                         if self.tut and self.part == 5:
                             self.part += 1
@@ -593,7 +642,7 @@ class PC:
 
                     while len(comp.pins) > 0:
                         v = False
-                        if "pin_breaker.exe" in self.harddrive:
+                        if self.search_file("pin_breaker.exe"):
                             v = True
                         if pin(comp.pins[0],comp.len[0],v):
                             print("Good Job")
@@ -601,7 +650,7 @@ class PC:
                             del comp.pins[0]
                             del comp.len[0]
                             print(str(pn) + " more pins remaining")
-                            if "length_scan.exe" in self.harddrive and pn > 0:
+                            if self.search_file("length_scan.exe") and pn > 0:
                                 print("The password is {} digits long".format(comp.len[0]))
                         else:
                             print("The pin got reset")
@@ -612,11 +661,14 @@ class PC:
                         print("You hacked the computer.")
                         if comp.firewall:
                             if firewall(comp, self):
-                                Instance.i = comp.ip
+                                self.connect(comp.ip)
                         else:
-                            Instance.i = comp.ip
+                            self.connect(comp.ip)
 
         elif command[0] == "shop":
+            if not self.my and not self.accessed:
+                print("You can't use the shop before you get access to the bitcoin wallet.")
+                return
             if self.tut and self.part == 1:
                 self.part += 1
                 print("Good job.")
@@ -702,27 +754,27 @@ class PC:
                         shell += "Opened"
                     else:
                         shell += "Closed"
-                    if (self.my and (self.see or "fire_disc.exe" in self.harddrive)) or (not(self.my) and "fire_disc.exe" in me.harddrive):
+                    if (self.my and (self.see or self.search_file("fire_disc.exe", me))) or (not(self.my) and self.search_file("fire_disc.exe", me)):
                         fire = "Firewall: " + str(search(comp).firewall)
-                    if (self.my and (self.see or "proxy_disc.exe" in self.harddrive)) or (not(self.my) and "proxy_disc.exe" in me.harddrive):
+                    if (self.my and (self.see or self.search_file("proxy_disc.exe", me)) or (not(self.my) and self.search_file("proxy_disc.exe", me))):
                         see = "Proxy: " + str(search(comp).proxy)
-                    if "balance_analyzer.exe" in self.harddrive or search(comp).accessed or "balance_analyzer.exe" in me.harddrive:
+                    if search(comp).accessed or self.search_file("balance_analyzer.exe", me):
                         money = "Balance: " + str(Bitcoin.users[comp].balance)
                     print("{}. {} files: {} {} {} {} {}".format(x[0],comp,len(search(comp).harddrive),money,see,shell,fire))
                 chose = input("Type computer number to access it and 'e' to exit: ")
                 if chose != "e":
-                    last_ip.append(self.ip)
-                    Instance.i = self.map[int(chose)-1]
+                    chosen = self.map[int(chose)-1]
+                    self.connect(chosen)
         elif command[0] == "proxy" and not(self.my):
             if self.asleep:
                 ln = random.randint(1,2)
                 att = random.randint(4,9)
                 v = False
-                if "pin_breaker.exe" in me.harddrive:
+                if self.search_file("pin_breaker.exe", me):
                     v = True
-                if "length_scan.exe" in me.harddrive:
+                if self.search_file("length_scan.exe", me):
                     print("The password is {} digits long".format(ln))
-                if "attempts_analyzer.exe" in me.harddrive:
+                if self.search_file("attempts_analyzer.exe", me):
                     print("You have {} attempts".format(att))
                 if pin(att,ln,v):
                    print("""
@@ -803,11 +855,11 @@ class PC:
             else:
                 print(self.help)
 
-        elif (command[0] == "bit_pas" and not(self.my)) and "trojan.exe" in me.harddrive:
+        elif (command[0] == "bit_pas" and not(self.my)) and self.search_file("trojan.exe", me):
             self.trojan = True
             print("Got password use 'bit' to hack the username and see the password.")
 
-        elif (command[0] == "bit" and not(self.my)) and "bitcoin_cracker.exe" in me.harddrive:
+        elif (command[0] == "bit" and not(self.my)) and self.search_file("bitcoin_cracker.exe", me):
             user = Bitcoin.users[self.ip].user
             password = Bitcoin.users[self.ip].password
             if "bit_access.exe" in me.harddrive:
@@ -845,7 +897,7 @@ class PC:
             else:
                 print("Wrong username/password.")
         elif command[0][0] == "b" and not(self.my):
-            if self.accessed or "balance_analyzer.exe" in me.harddrive:
+            if self.accessed or self.search_file("balance_analyzer.exe", me):
                 print("Balance: " + str(Bitcoin.users[self.ip].balance))
             else:
                 print("First log in your account using access [username] [password]")
@@ -872,14 +924,14 @@ class PC:
                 self.tut = False
                 self.part = 0
                 print("If you check now your balance you should have the money :D.\nAlright now use '(f)ind' again to see the other two ways of defence you will encounter")
-        elif command[0] == "spam" and not(self.my) and "chain_spam.exe" in me.harddrive:
+        elif command[0] == "spam" and not(self.my) and self.search_file("chain_spam.exe", me):
             if not(self.spam):
                 PC.all_pc[0].spam_c += 1
                 self.spam = True
                 print("Spam installed")
             else:
                 print("Already installed spam.")
-        elif command[0] == "del" and ("log_deleter.exe" in self.harddrive or "log_deleter.exe" in me.harddrive):
+        elif command[0] == "del" and (self.search_file("log_deleter.exe", me)):
             self.logs = ""
             print("Logs deleted.")
         elif command[0][0] == "q":
