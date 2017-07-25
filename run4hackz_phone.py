@@ -3,8 +3,8 @@ import re
 import copy
 import pickle
 
-#TODO Fix the last_ip when dealing with multiple chained disconnects
-#TODO add custom random generated names for each computer
+
+#TODO fix phone version save bug
 #TODO fix code
 
 
@@ -158,11 +158,11 @@ def proxy(comp, self):
             print(
                 "Pretty self-explanatory you will bypass the firewall if you have enough shells opened\nThere are some programs that will help you to see the max of the proxy")
         use = input("'b' to try to bypass, 'c' - to cancel: ")
-        if "proxy_disable.exe" in self.harddrive:
+        if self.search_file("proxy_disable.exe"):
             comp.proxy = False
             print("Disabled proxy via proxy_disable.exe")
         if use != "c":
-            if PC.all_pc[0].over >= comp.overload:
+            if self.over >= comp.overload:
                 print("""
                         The computer is protected with a proxy
                                  .......
@@ -182,11 +182,12 @@ def proxy(comp, self):
                 print("Proxy bypassed with {}/{} max shells".format(PC.all_pc[0].over, comp.overload))
                 comp.proxy = False
                 comp.asleep = True
-                last_ip.append(self.ip)
-            elif comp.proxy:
+                last_ip.append(comp.ip)
+            else:
                 print("Failed to bypass proxy.")
                 print("Disconnected.")
                 return
+
             if not (comp.proxy):
                 while comp.asleep:
                     print("You have {} commands remaining before proxy restarts".format(comp.coms))
@@ -194,16 +195,20 @@ def proxy(comp, self):
                         self.part += 1
                         print("The proxy server is temporaly down you can disable it by using 'proxy' command")
                     use = input(comp.bash)
-                    if use == "dis":  # make an actual disconnect
-                        self.disconnect()
+
                     if comp.coms > 0:
+                        if use == "dis":
+                            return False
                         comp.execute(use)
                         comp.coms -= 1
-                    else:
+                    elif comp.coms == 0:
                         print("Proxy restarted")
                         comp.proxy = True
                         comp.asleep = False
-                        break
+                        return False
+        else:
+            return False
+
 
 
 
@@ -259,6 +264,10 @@ def firewall(comp, self):
             self.harddrive.remove("bitcoin_cracker.exe")
             self.tut = False
             self.part = 0
+        return True
+    else:
+        return False
+
 
 
 
@@ -357,7 +366,7 @@ def bit_gen(user_max,pass_max):
 
 
 def username_gen():
-    users = ["halperyon", "syphon", "viper", "KIT", "Crackerz", "Jim", "r00t", "root", "system", "server", "Microsoft_server"]
+    users = ["h4xor","sentinel","core","halperyon", "syphon", "viper", "KIT", "Crackerz", "Jim", "r00t", "root", "system", "server", "Microsoft_server"]
     user = random.choice(users)
     while user in PC.all_users:
         user += str(random.randint(0,9))
@@ -627,7 +636,10 @@ class PC:
                 comp = comps[int(choice)-1].ip
                 comp = search(comp)
                 if comp.proxy:
-                    proxy(comp,self)
+                    ret = proxy(comp, self)
+                    if not ret:
+                        self.disconnect()
+                        return
                 if not(comp.proxy):
                     if self.tut and self.part == 15:
                         self.part += 1
@@ -659,14 +671,19 @@ class PC:
                             print("The pin got reset")
                             break
                     if len(comp.pins) == 0:
-                        self.logs += "Connected to {}\n".format(comp.ip)
-                        self.map.append(comp.ip)
-                        print("You hacked the computer.")
+                        hacked = False
                         if comp.firewall:
                             if firewall(comp, self):
                                 self.connect(comp.ip)
+                                hacked = True
                         else:
                             self.connect(comp.ip)
+                            hacked = True
+
+                        if hacked:
+                            self.logs += "Connected to {}\n".format(comp.ip)
+                            self.map.append(comp.ip)
+                            print("You hacked the computer.")
 
         elif command[0] == "shop":
             if not self.my and not self.accessed:
@@ -799,6 +816,7 @@ class PC:
                    self.asleep = False
                    self.proxy = False
                    print("PROXY DISABLE")
+
         elif command[0][0] == "g" and not(self.my):
             file = command[1]
             file = self.search_file(file)
@@ -969,10 +987,6 @@ class Bitcoin:
                       File("bit_access.exe", 3), File("fire_disc.exe", 8), File("firewall_disable.exe", 2)]
 
 #TEST
-comp = PC(File.all_files[2:4], False, "test")
-comp.proxy = True
-comp.overload = 2
-print("IP: " + comp.ip)
 
 #TEST
 
@@ -982,6 +996,7 @@ if exists():
     ls = load()
     money = ls[1][ls[0][0].ip].balance
     print("Money on save: {}$".format(money))
+    print("Username: " + ls[0][0].bash[:-2])
     ch = input("Do you want to load previous save y/n?: ")
     if ch == "n":
         ch = input("Warning! Starting a new game will delete all your progress y/n?: ")
