@@ -134,7 +134,7 @@ def catch(charge):
 def proxy(comp, self):
     global last_ip
     while comp.proxy:
-        if "proxy_over.exe" in self.harddrive:
+        if comp.search_file("proxy_over.exe", self):
             print("The computer nedds {} shells to be overloaded".format(comp.overload))
         print("""
                 The computer is protected with a proxy
@@ -151,59 +151,59 @@ def proxy(comp, self):
           |            |         *      *           0            0
            ------------          ********           00000000000000
 
-""")
-    print("Overload it by opening shells on other targets")
-    if self.tut and self.part == 13:
-        self.part += 1
-        print(
-            "Pretty self-explanatory you will bypass the firewall if you have enough shells opened\nThere are some programs that will help you to see the max of the proxy")
-    use = input("'b' to try to bypass, 'c' - to cancel: ")
-    if "proxy_disable.exe" in self.harddrive:
-        comp.proxy = False
-        print("Disabled proxy via proxy_disable.exe")
-    if use != "c":
-        if PC.all_pc[0].over >= comp.overload:
-            print("""
-                    The computer is protected with a proxy
-                             .......
-                           ...     .\
-               ------------.        /
-              |            |         ********             Connected.
-              |            |         *PROXY *.........\ 00000000000000
-              |            |         *RESTA-*         / 0  TARGET    0
-              |   YOU      |         *RTING *           0            0
-              |            |         *      *           0            0
-              |            |         *      *           0            0
-              |            |         *      *           0            0
-              |            |         *      *           0            0
-               ------------          ********           00000000000000
-
     """)
-            print("Proxy bypassed with {}/{} max shells".format(PC.all_pc[0].over, comp.overload))
+        print("Overload it by opening shells on other targets")
+        if self.tut and self.part == 13:
+            self.part += 1
+            print(
+                "Pretty self-explanatory you will bypass the firewall if you have enough shells opened\nThere are some programs that will help you to see the max of the proxy")
+        use = input("'b' to try to bypass, 'c' - to cancel: ")
+        if "proxy_disable.exe" in self.harddrive:
             comp.proxy = False
-            comp.asleep = True
-            last_ip.append(self.ip)
-        elif comp.proxy:
-            print("Failed to bypass proxy.")
-            print("Disconnected.")
-            return
-        if not (comp.proxy):
-            while comp.asleep:
-                print("You have {} commands remaining before proxy restarts".format(comp.coms))
-                if self.tut and self.part == 14:
-                    self.part += 1
-                    print("The proxy server is temporaly down you can disable it by using 'proxy' command")
-                use = input(comp.bash)
-                if use == "dis":  # make an actual disconnect
-                    self.disconnect()
-                if comp.coms > 0:
-                    comp.execute(use)
-                    comp.coms -= 1
-                else:
-                    print("Proxy restarted")
-                    comp.proxy = True
-                    comp.asleep = False
-                    break
+            print("Disabled proxy via proxy_disable.exe")
+        if use != "c":
+            if PC.all_pc[0].over >= comp.overload:
+                print("""
+                        The computer is protected with a proxy
+                                 .......
+                               ...     .\
+                   ------------.        /
+                  |            |         ********             Connected.
+                  |            |         *PROXY *.........\ 00000000000000
+                  |            |         *RESTA-*         / 0  TARGET    0
+                  |   YOU      |         *RTING *           0            0
+                  |            |         *      *           0            0
+                  |            |         *      *           0            0
+                  |            |         *      *           0            0
+                  |            |         *      *           0            0
+                   ------------          ********           00000000000000
+
+        """)
+                print("Proxy bypassed with {}/{} max shells".format(PC.all_pc[0].over, comp.overload))
+                comp.proxy = False
+                comp.asleep = True
+                last_ip.append(self.ip)
+            elif comp.proxy:
+                print("Failed to bypass proxy.")
+                print("Disconnected.")
+                return
+            if not (comp.proxy):
+                while comp.asleep:
+                    print("You have {} commands remaining before proxy restarts".format(comp.coms))
+                    if self.tut and self.part == 14:
+                        self.part += 1
+                        print("The proxy server is temporaly down you can disable it by using 'proxy' command")
+                    use = input(comp.bash)
+                    if use == "dis":  # make an actual disconnect
+                        self.disconnect()
+                    if comp.coms > 0:
+                        comp.execute(use)
+                        comp.coms -= 1
+                    else:
+                        print("Proxy restarted")
+                        comp.proxy = True
+                        comp.asleep = False
+                        break
 
 
 
@@ -231,8 +231,8 @@ def firewall(comp, self):
     if self.tut and self.part == 16:
         self.part += 1
         print("To solve this the 3 numbers from each row,colomun and diagonal should have the same sum.")
-    if "firewall_disable.exe" in self.harddrive or magic_square(random.randint(1, 4), nope(ratio(6, 4, len(self.map)))):
-        if "firewall_disable.exe" in self.harddrive:
+    if self.search_file("firewall_disable.exe") or magic_square(random.randint(1, 4), nope(ratio(6, 4, len(self.map)))):
+        if self.search_file("firewall_disable.exe"):
             print("Firewall disabled via firewall_disable.exe")
         print("""
                              The computer has an inactive Firewall.
@@ -259,16 +259,6 @@ def firewall(comp, self):
             self.harddrive.remove("bitcoin_cracker.exe")
             self.tut = False
             self.part = 0
-
-
-    if not (comp.firewall):
-        if "chain_spam.exe" in self.harddrive:
-            Bitcoin.users[self.ip].balance += PC.all_pc[0].spam_c * 50
-        last_ip = []
-        last_ip.append(self.ip)
-        if self.tut and self.part == 6:
-            comp.part = 6
-            comp.tut = True
 
 
 
@@ -568,6 +558,19 @@ class PC:
                 print("Goodbye.")
                 exit()
             self.disconnect()
+
+        elif command[0] == "connect":
+            ip = command[1]
+            self.connect(ip)
+
+        elif command[0] == "spam" and not(self.my) and self.search_file("chain_spam.exe", me):
+            if not(self.spam):
+                PC.all_pc[0].spam_c += 1
+                self.spam = True
+                print("Spam installed")
+            else:
+                print("Already installed spam.")
+
         elif command[0] == "notes":
             if self.my:
                 print(self.notes)
@@ -798,13 +801,14 @@ class PC:
                    print("PROXY DISABLE")
         elif command[0][0] == "g" and not(self.my):
             file = command[1]
-            if file in self.harddrive:
+            file = self.search_file(file)
+            if file:
                 me.harddrive.append(file)
                 self.harddrive.remove(file)
-                print(file + " successfully downloaded.")
-                self.logs += me.ip + " downloaded " + file + "\n"
-            elif not(file in self.harddrive):
-                print("File " + file + " does not exist.")
+                print(file.name + " successfully downloaded.")
+                self.logs += me.ip + " downloaded " + file.name + "\n"
+            else:
+                print("File " + file.name + " does not exist.")
 
         elif command[0] == "help":
             cm = command
@@ -924,13 +928,7 @@ class PC:
                 self.tut = False
                 self.part = 0
                 print("If you check now your balance you should have the money :D.\nAlright now use '(f)ind' again to see the other two ways of defence you will encounter")
-        elif command[0] == "spam" and not(self.my) and self.search_file("chain_spam.exe", me):
-            if not(self.spam):
-                PC.all_pc[0].spam_c += 1
-                self.spam = True
-                print("Spam installed")
-            else:
-                print("Already installed spam.")
+
         elif command[0] == "del" and (self.search_file("log_deleter.exe", me)):
             self.logs = ""
             print("Logs deleted.")
@@ -964,10 +962,22 @@ class Bitcoin:
         self.password = password
         self.balance = balance
 
+    File.all_files = [File("length_scan.exe", 10), File("attempts_analyzer.exe", 8), File("bitcoin_cracker.exe", 9),
+                      File("chain_spam.exe", 9), File("trojan.exe", 5), File("file_analyzer.exe", 7),
+                      File("balance_analyzer.exe", 4), File("log_deleter.exe", 3), File("proxy_disc.exe", 6),
+                      File("proxy_disable.exe", 1), File("pin_breaker.exe", 1), File("proxy_over.exe", 7),
+                      File("bit_access.exe", 3), File("fire_disc.exe", 8), File("firewall_disable.exe", 2)]
+
+#TEST
+comp = PC(File.all_files[2:4], False, "test")
+comp.proxy = True
+comp.overload = 2
+print("IP: " + comp.ip)
+
+#TEST
 
 #startup sequence
 
-File.all_files = [File("length_scan.exe", 10), File("attempts_analyzer.exe", 8), File("bitcoin_cracker.exe", 9), File("chain_spam.exe", 9), File("trojan.exe", 5), File("file_analyzer.exe", 7), File("balance_analyzer.exe", 4), File("log_deleter.exe", 3), File("proxy_disc.exe", 6), File("proxy_disable.exe", 1), File("pin_breaker.exe", 1), File("proxy_over.exe", 7), File("bit_access.exe", 3), File("fire_disc.exe", 8), File("firewall_disable.exe", 2)]
 if exists():
     ls = load()
     money = ls[1][ls[0][0].ip].balance
