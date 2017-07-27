@@ -4,12 +4,13 @@ import copy
 import pickle
 
 
+#TODO balance changes for the log deleter
 #TODO fix phone version save bug
 #TODO fix code
 
 
 
-def save_functions(file="/storage/emulated/0/games/db.txt"):
+def save_functions(file="/storage/emulated/0/games/saves.pkl"):
     def exists():
         try:
             f = open(file, "r")
@@ -208,6 +209,7 @@ def proxy(comp, self):
                         return False
         else:
             return False
+    return True
 
 
 
@@ -430,8 +432,8 @@ def comp_gen():
         comps[-1].map = maps
         if level >= 6 and chance(40):
             comps[-1].proxy = True
-            comps[-1].overload = random.randint(1,random.randint(1,level-2))
-            comps[-1].coms = random.randint(comps[-1].overload+3,(comps[-1].overload+10))
+            comps[-1].overload = random.randint(1,random.randint(1,level))
+            comps[-1].coms = random.randint(comps[-1].overload+3,comps[-1].overload+10)
         if level >= 6 and chance(30):
             comps[-1].firewall = True
         balance = random.randint(ratio(4,200,level-4),ratio(5,1000,level-2))
