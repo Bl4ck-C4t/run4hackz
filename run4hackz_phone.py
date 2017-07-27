@@ -4,6 +4,7 @@ import copy
 import pickle
 
 
+#TODO look at give command balance
 #TODO balance changes for the log deleter
 #TODO fix phone version save bug
 #TODO fix code
@@ -955,8 +956,25 @@ class PC:
                 print("If you check now your balance you should have the money :D.\nAlright now use '(f)ind' again to see the other two ways of defence you will encounter")
 
         elif command[0] == "del" and (self.search_file("log_deleter.exe", me)):
-            self.logs = ""
-            print("Logs deleted.")
+            print("Select log/s to delete.")
+            ls = self.logs.split("\n")
+            ls = [x for x in ls if x != ""]
+            while True:
+                for x in enumerate(ls, start=1):
+                    print("{}. {}".format(x[0], x[1]))
+                en = input("Log number('e' to exit): ")
+                if en == "e":
+                    break
+                en = int(en)-1
+                if not self.my:
+                    acc = Bitcoin.users[me.ip]
+                    acc.balance -= 50
+                    print("50$ charged.")
+                del ls[en]
+                print("Log deleted")
+                log = "\n".join(ls)
+                self.logs = log
+
         elif command[0][0] == "q":
             print("Warning any unsaved progress will be lost(use '(s)ave' to save)")
             end = input("Do you really want to exit y/n?: ")
