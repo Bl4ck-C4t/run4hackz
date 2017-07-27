@@ -447,6 +447,11 @@ def search(ip):
             return comp
     return False
 
+def find_prog(name):
+    for x in File.all_files:
+        if x.name == name:
+            return x
+    return False
 
 class File:
     all_files = []
@@ -715,7 +720,7 @@ class PC:
                         if confirm == "y":
                             if acc.balance >= price:
                                 acc.balance -= price
-                                self.harddrive.append(prog)
+                                self.harddrive.append(find_prog(prog))
                                 print("Purchase completed")
                             else:
                                 print("You need {} more $".format(price-acc.balance))
@@ -727,14 +732,14 @@ class PC:
                     print("You have {}$".format(acc.balance))
                     print("Available programs for you to sell.")
                     for x in enumerate(self.harddrive,start=1):
-                        print("{}. {} : {}$".format(x[0],x[1], prices[x[1]]))
+                        print("{}. {} : {}$".format(x[0],x[1].name, prices[x[1].name]))
                     sell = input("Type program number 'e' to exit: ")
                     if sell != "e":
                         prog = self.harddrive[int(sell)-1]
                         confirm = input("Are you sure you want to sell {} y/n: ".format(prog))
                         if confirm == "y":
                             del self.harddrive[int(sell)-1]
-                            acc.balance += prices[prog]
+                            acc.balance += prices[prog.name]
                         else:
                             print("Selling canceled.")
                             print("Now you have {}$".format(acc.balance))
