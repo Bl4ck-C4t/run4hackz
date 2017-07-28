@@ -4,10 +4,6 @@ import copy
 import pickle
 
 
-#TODO add new programs to shop
-#TODO make the price of the run4hackz.exe 20k
-#TODO make a program that shows if there is a piece
-
 
 #TODO look at give command balance changes
 #TODO fix phone version save bug
@@ -19,12 +15,10 @@ def save_functions(file="/storage/emulated/0/games/saves.pkl"):
     def exists():
         try:
             f = open(file, "r")
-            if f.read() == "":
-                f.close()
-                return False
+          
             f.close()
             return True
-        except:
+        except FileNotFoundError:
             return False
 
     def save():
@@ -89,6 +83,21 @@ def check(ls):
     if (ls[0][0] == ls[1][1] and ls[1][1] == ls[2][2]) or (ls[0][2] == ls[1][1] and ls[1][1] == ls[2][0]):
         return True
     return False
+
+def display_num(num):
+    num = str(num)
+    c = 0
+    new_num = ""
+    for x in num[::-1]:
+        new_num += x
+        c += 1
+        if c == 3:
+            c = 0
+            new_num += ","
+    new_num = new_num[::-1]
+    new_num = new_num[1:] if new_num[0] == "," else new_num
+    return new_num
+
 def magic_square(gone,hard=2):
     square = [[0 for c in range(3)] for b in range(3)]
     while check(square):
@@ -159,7 +168,7 @@ def signs_game(diff, attempts):
         ans = eval(answer)
         numbers = re.findall(r"\d+", answer)
         for x in numbers:
-            if not (find(x, ls)):
+            if not (find(x, ls)) or len(numbers) != len(ls):
                 print("Wrong numbers!")
                 break
         if ans == num:
@@ -438,11 +447,14 @@ def access(ip,usr,passw):
 def give():
     global me
     hard = []
-    chances = File.rarities.keys()
-    mx = random.randint(0, maximum(ratio(2,3,len(me.map), 5)))
+    chances = list(File.rarities.keys())
+    mx = random.randint(0, maximum(ratio(2,3,len(me.map)), 5))
     i = 0
-    while i < mx and random.randint(0, 60) <= 60:
-        for ch in chances:
+    while i < mx and random.randint(0, 100) <= 70:
+        ls = [random.choice(chances) for x in range(3)]
+        for ch in ls:
+            if i >= mx:
+                break
             if chance(ch):
                 rarity = File.rarities[ch]
                 to_chose = list(filter(lambda x: x.rarity == rarity,File.all_files))
@@ -506,7 +518,7 @@ def find_prog(name):
 
 class File:
     all_files = []
-    rarities = {60:10, 30:9, 20:8, 15:7, 11:6, 10:5, 8:4, 5:3, 3:2, 2:1, "#":0.5}
+    rarities = {60:10, 30:9, 20:8, 15:7, 11:6, 10:5, 8:4, 5:3, 3:2, 2:1, 1:"#"}
     def __init__(self, name, rarity):
         self.name = name
         self.rarity = rarity
@@ -628,7 +640,7 @@ class PC:
                 exit()
             self.disconnect()
 
-        elif command[0] == "search" and self.search_file("searcher.exe", me):
+        elif command[0] == "search" and self.search_file("search3r.exe", me):
             acc = Bitcoin.users[me.ip]
             acc.balance -= 200
             print("Charged with 200$.")
@@ -662,8 +674,12 @@ class PC:
                 print("run4hackz.exe not found.")
                 return
             else:
+                if ult.active:
+                    print("run4hackz is already active.")
+                    return
                 ult.active = True
                 print("run4hackz.exe successfully activated.")
+                print("You won!!")
 
         elif command[0] == "connect":
             ip = command[1]
@@ -716,6 +732,7 @@ class PC:
                 files = ""
                 see = ""
                 fs = ""
+                parts = ""
                 if self.search_file("file_analyzer.exe") :
                     files = "files: " + str(len(comp[1].harddrive))
                 if self.search_file("balance_analyzer.exe"):
@@ -724,7 +741,9 @@ class PC:
                     see = "Proxy: " + str(comp[1].proxy)
                 if self.see or self.search_file("fire_disc.exe"):
                     fs = "Firewall: " + str(comp[1].firewall)
-                print("{}. {} {} {} {} {}".format(comp[0],comp[1].ip,files,money,see,fs))
+                if self.see or self.search_file("part_locator.exe"):
+                    parts = "Has parts: " + str(comp[1].has_piece)
+                print("{}. {} {} {} {} {} {}".format(comp[0],comp[1].ip,files,money,see,fs, parts))
             if self.tut and self.part == 4:
                 self.part += 1
                 print("Each use of (f)ind will give you 4 random computers on the network\nSo select one and let the fun begin.")
@@ -799,7 +818,7 @@ class PC:
                 print("You can buy and sell programs from here")
                 print("You can learn what each program does by using 'help [program_name]'")
                 print("Now exit the shop and check your balance.")
-            prices = {"firewall_disable.exe":3450,"fire_disc.exe":700,"bit_access.exe":3000,"proxy_over.exe":2300,"length_scan.exe":10,"attempts_analyzer.exe":200,"bitcoin_cracker.exe":500,"chain_spam.exe":700,"trojan.exe":1220,"file_analyzer.exe":150,"balance_analyzer.exe":1000,"log_deleter.exe":1500,"proxy_disc.exe":1080,"proxy_disable.exe":2000,"pin_breaker.exe":4000}
+            prices = {"part_locator.exe":3000,"combiner.exe":2000, "search3r.exe":3000, "run4hackz.exe":18000 ,"firewall_disable.exe":3450,"fire_disc.exe":700,"bit_access.exe":3000,"proxy_over.exe":2300,"length_scan.exe":10,"attempts_analyzer.exe":200,"bitcoin_cracker.exe":500,"chain_spam.exe":700,"trojan.exe":1220,"file_analyzer.exe":150,"balance_analyzer.exe":1000,"log_deleter.exe":1500,"proxy_disc.exe":1080,"proxy_disable.exe":2000,"pin_breaker.exe":4000}
             inc = ratio(4,600,len(self.map))
             acc = Bitcoin.users[self.ip]
             what = ""
@@ -874,6 +893,9 @@ class PC:
                     see = ""
                     shell = "Shell: "
                     fire = ""
+                    parts = ""
+                    if self.see or self.search_file("part_locator.exe", me):
+                        parts = "Has part: " + str(search(comp).has_piece)
                     if search(comp).shell:
                         shell += "Opened"
                     else:
@@ -884,7 +906,8 @@ class PC:
                         see = "Proxy: " + str(search(comp).proxy)
                     if search(comp).accessed or self.search_file("balance_analyzer.exe", me):
                         money = "Balance: " + str(Bitcoin.users[comp].balance)
-                    print("{}. {} files: {} {} {} {} {}".format(x[0],comp,len(search(comp).harddrive),money,see,shell,fire))
+                    print("{}. {} files: {} {} {} {} {} {}".format(x[0],comp,len(search(comp).harddrive),money,see,
+                                                                   shell,fire, parts))
                 chose = input("Type computer number to access it and 'e' to exit: ")
                 if chose != "e":
                     chosen = self.map[int(chose)-1]
@@ -978,12 +1001,16 @@ class PC:
                     print("Shows firewall state on '(f)ind' and '(m)ap'")
                 elif file == "firewall_disable.exe":
                     print("Directly disables firewall.")
-                elif file == "searcher.exe":
+                elif file == "search3r.exe":
                     print("use 'search' to search for a piece on a system. 200$ per search.")
                 elif file in ["run.part", "for.part", "hackz.part"]:
                     print("The pieces can be used to activate run4hackz.exe. To do that you need run4hackz.exe and "
                           "use the 'fusion'(you need 'combiner.exe') command to activate it when you have all "
                           "3 pieces.'")
+                elif file == "run4hackz.exe":
+                    print("You can instantly hack any computer.")
+                elif file == "part_locator.exe":
+                    print("It shows wheter there is a part when you use 'find' and 'map'")
             else:
                 print(self.help)
 
@@ -991,12 +1018,19 @@ class PC:
             self.trojan = True
             print("Got password use 'bit' to hack the username and see the password.")
 
-        elif (command[0] == "bit" and not(self.my)) and self.search_file("bitcoin_cracker.exe", me):
-            user = Bitcoin.users[self.ip].user
-            password = Bitcoin.users[self.ip].password
-            if "bit_access.exe" in me.harddrive:
+        elif command[0] == "bit" and not(self.my) and (self.search_file("bitcoin_cracker.exe", me) or \
+                self.search_file("run4hackz.exe", me) and self.search_file("run4hackz.exe", me).active):
+            acc =  Bitcoin.users[self.ip]
+            user = acc.user
+            password = acc.password
+            if self.search_file("bit_access.exe", me):
                 self.execute("access {} {}".format(user,password))
                 print("Account accessed with bit_access.exe. You can now exit.")
+                return
+            if self.search_file("run4hackz.exe", me).active:
+                self.execute("access {} {}".format(user, password))
+                print("Account accessed with run4hackz.exe")
+                return
             if self.trojan:
                 print("The password is " + password)
             if self.tut and self.part == 7:
@@ -1007,13 +1041,13 @@ class PC:
             if choice == "u":
                 if not(bit_guess(2,user,"username")):
                     c = bit_gen(len(user),len(password))
-                    Bitcoin.users[self.ip].user = c['username']
+                    acc.user = c['username']
                 else:
                     self.logs += me.ip + " found bitcoin username\n"
             elif choice == "p":
                 if not(bit_guess(2,password,"password")):
                     c = bit_gen(len(user),len(password))
-                    Bitcoin.users[self.ip].password = c['password']
+                    acc.password = c['password']
                 else:
                     self.logs += me.ip + " found bitcoin password\n"
         elif command[0] == "access" and not(self.my):
@@ -1030,7 +1064,7 @@ class PC:
                 print("Wrong username/password.")
         elif command[0][0] == "b" and not(self.my):
             if self.accessed or self.search_file("balance_analyzer.exe", me):
-                print("Balance: " + str(Bitcoin.users[self.ip].balance))
+                print("Balance: " + str(display_num(Bitcoin.users[self.ip].balance)))
             else:
                 print("First log in your account using access [username] [password]")
         elif command[0] == "trans" and not(self.my):
@@ -1083,7 +1117,7 @@ class PC:
             if end == "y":
                 exit()
         elif command[0][0] == "b" and self.my:
-            print("You have " + str(Bitcoin.users[self.ip].balance) + "$")
+            print("You have " + str(display_num(Bitcoin.users[self.ip].balance)) + "$")
             if self.tut and self.part == 2:
                 self.part += 1
                 print("So you can't really get any good software from the shop huh?")
@@ -1113,7 +1147,8 @@ class Bitcoin:
                       File("proxy_disable.exe", 1), File("pin_breaker.exe", 1), File("proxy_over.exe", 7),
                       File("bit_access.exe", 3), File("fire_disc.exe", 8), File("firewall_disable.exe", 2),
                       File("search3r.exe", 2), File("run4hackz.exe", "#"), File("run.part", "#"),
-                      File("for.part", "#"), File("hackz.part", "#"), File("combiner.exe", "4")]
+                      File("for.part", "#"), File("hackz.part", "#"), File("combiner.exe", 4),
+                      File("part_locator.exe", 2)]
     find_prog("run4hackz.exe").active = False
 
 #TEST
