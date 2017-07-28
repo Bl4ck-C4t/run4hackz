@@ -4,8 +4,12 @@ import copy
 import pickle
 
 
-#TODO look at give command balance
-#TODO balance changes for the log deleter
+#TODO add new programs to shop
+#TODO make the price of the run4hackz.exe 20k
+#TODO make a program that shows if there is a piece
+
+
+#TODO look at give command balance changes
 #TODO fix phone version save bug
 #TODO fix code
 
@@ -126,6 +130,44 @@ def magic_square(gone,hard=2):
         num = int(ps[2])
         del square[row][col]
         square[row].insert(col,num)
+
+def find(what, where):
+    for x in where:
+        if x == what:
+            return True
+    return False
+
+def signs_game(diff, attempts):
+    mx = diff
+    signs = "+-/*"
+    ls = [random.randint(1, mx) for x in range(3)]
+    chosen = [random.choice(signs) for x in range(2)]
+    ls1 = ls[:]
+    random.shuffle(ls1)
+    num = eval("{}{}{}".format(ls[0], chosen[0], ls[1]))
+    num = int(eval("{}{}{}".format(num, chosen[1], ls[2])))
+    ls = list(map(lambda x: str(x), ls))
+    print(" ? ".join(ls) + " = " + str(num))
+    while True:
+        if attempts == 0:
+            print("You ran out of attempts.")
+            return False
+        answer = input("Enter solution: ")
+        if answer == "cheat":
+            print("({} {} {}) {} {} = {}".format(ls[0], chosen[0], ls[1], chosen[1], ls[2], num))
+            continue
+        ans = eval(answer)
+        numbers = re.findall(r"\d+", answer)
+        for x in numbers:
+            if not (find(x, ls)):
+                print("Wrong numbers!")
+                break
+        if ans == num:
+            print("Correct!")
+            return True
+        else:
+            print("Wrong result: Your result is {}\nYou need to get the result {}".format(ans, num))
+        attempts -= 1
 
 
 def catch(charge):
@@ -345,6 +387,10 @@ def chance(chance):
 def ratio(n1,n2,n3):
     return int((n2*n3)/n1)
 
+def maximum(val, m_val):
+    val = m_val if val > m_val else val
+    return val
+
 def bit_gen(user_max,pass_max):
     chart = "0123456789qwertyuiopasdfghjklzxcvbnm"
     credit = {"username":"","password":""}
@@ -393,7 +439,7 @@ def give():
     global me
     hard = []
     chances = File.rarities.keys()
-    mx = random.randint(0,ratio(2,3,len(me.map)))
+    mx = random.randint(0, maximum(ratio(2,3,len(me.map), 5)))
     i = 0
     while i < mx and random.randint(0, 60) <= 60:
         for ch in chances:
@@ -431,6 +477,8 @@ def comp_gen():
         comps[-1].pins = pins
         comps[-1].len = length
         comps[-1].map = maps
+        if chance(30):
+            comps[-1].has_piece = True
         if level >= 6 and chance(40):
             comps[-1].proxy = True
             comps[-1].overload = random.randint(1,random.randint(1,level))
@@ -458,7 +506,7 @@ def find_prog(name):
 
 class File:
     all_files = []
-    rarities = {60:10, 30:9, 20:8, 15:7, 11:6, 10:5, 8:4, 5:3, 3:2, 2:1}
+    rarities = {60:10, 30:9, 20:8, 15:7, 11:6, 10:5, 8:4, 5:3, 3:2, 2:1, "#":0.5}
     def __init__(self, name, rarity):
         self.name = name
         self.rarity = rarity
@@ -491,6 +539,7 @@ class PC:
         self.accessed = False
         self.trojan = False
         self.see = False
+        self.has_piece = False
         self.notes = ""
         self.map = []
         self.my = my
@@ -509,6 +558,9 @@ class PC:
                 Instance.i = 0
         else:
             print("You can't disconnect from yourself. Use exit to close the game")
+        if self.search_file("run4hackz.exe", me) and self.search_file("run4hackz.exe", me).active:
+            self.logs = ""
+            print("Logs auto deleted.")
         log = self.logs
         log = log.split("\n")[:-1]
         for x in log:
@@ -575,6 +627,43 @@ class PC:
                 print("Goodbye.")
                 exit()
             self.disconnect()
+
+        elif command[0] == "search" and self.search_file("searcher.exe", me):
+            acc = Bitcoin.users[me.ip]
+            acc.balance -= 200
+            print("Charged with 200$.")
+            print("Searching for piece...")
+            if not self.has_piece:
+                print("No piece found on system.")
+                return
+            print("Protected piece found!")
+            print("Do you want to try to shutdown it's protection?(y/n): ")
+            en = input("Enter: ")
+            if en == "n":
+                return
+            diff = random.randint(1, ratio(6, 150, len(me.map)))
+            att = random.randint(1, ratio(1, 6, len(me.map)))
+            if signs_game(diff, att):
+                print("You disabled the protection of the piece.")
+                ind1 = File.all_files.index(find_prog("run.part"))
+                ind2 = File.all_files.index(find_prog("hackz.part"))
+                piece = File.all_files[random.randint(ind1, ind2)]
+                print("Found and added piece '{}'".format(piece.name))
+                me.harddrive.append(piece)
+                self.has_piece = False
+
+        elif command[0] == "fusion" and self.search_file("combiner.exe"):
+            ls = [self.search_file("run.part"), self.search_file("for.part"), self.search_file("hackz.part")]
+            if False in ls:
+                print("Cannot fuse, unsufficent parts.")
+                return
+            ult = self.search_file("run4hackz.exe")
+            if ult == False:
+                print("run4hackz.exe not found.")
+                return
+            else:
+                ult.active = True
+                print("run4hackz.exe successfully activated.")
 
         elif command[0] == "connect":
             ip = command[1]
@@ -643,6 +732,13 @@ class PC:
             if choice != "c":
                 comp = comps[int(choice)-1].ip
                 comp = search(comp)
+                if self.search_file("run4hackz.exe") and self.search_file("run4hackz.exe").active:
+                    print("RUN4HACKZ activated.")
+                    comp.proxy = False
+                    comp.firewall = False
+                    comp.pins = []
+                    print("Defenses bypassed.")
+                    print("Auto log deleter active!")
                 if comp.proxy:
                     ret = proxy(comp, self)
                     if not ret:
@@ -882,6 +978,12 @@ class PC:
                     print("Shows firewall state on '(f)ind' and '(m)ap'")
                 elif file == "firewall_disable.exe":
                     print("Directly disables firewall.")
+                elif file == "searcher.exe":
+                    print("use 'search' to search for a piece on a system. 200$ per search.")
+                elif file in ["run.part", "for.part", "hackz.part"]:
+                    print("The pieces can be used to activate run4hackz.exe. To do that you need run4hackz.exe and "
+                          "use the 'fusion'(you need 'combiner.exe') command to activate it when you have all "
+                          "3 pieces.'")
             else:
                 print(self.help)
 
@@ -1009,7 +1111,10 @@ class Bitcoin:
                       File("chain_spam.exe", 9), File("trojan.exe", 5), File("file_analyzer.exe", 7),
                       File("balance_analyzer.exe", 4), File("log_deleter.exe", 3), File("proxy_disc.exe", 6),
                       File("proxy_disable.exe", 1), File("pin_breaker.exe", 1), File("proxy_over.exe", 7),
-                      File("bit_access.exe", 3), File("fire_disc.exe", 8), File("firewall_disable.exe", 2)]
+                      File("bit_access.exe", 3), File("fire_disc.exe", 8), File("firewall_disable.exe", 2),
+                      File("search3r.exe", 2), File("run4hackz.exe", "#"), File("run.part", "#"),
+                      File("for.part", "#"), File("hackz.part", "#"), File("combiner.exe", "4")]
+    find_prog("run4hackz.exe").active = False
 
 #TEST
 
