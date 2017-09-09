@@ -4,9 +4,8 @@ import copy
 import pickle
 
 
-
+#TODO add the run4hackz to the tutorial as explanation of the games' objective
 #TODO look at give command balance changes
-#TODO fix phone version save bug
 #TODO fix code
 
 
@@ -451,7 +450,7 @@ def give():
     mx = random.randint(0, maximum(ratio(2,3,len(me.map)), 5))
     i = 0
     while i < mx and random.randint(0, 100) <= 70:
-        ls = [random.choice(chances) for x in range(3)]
+        ls = [random.choice(chances) for x in range(4)]
         for ch in ls:
             if i >= mx:
                 break
@@ -602,6 +601,13 @@ class PC:
     def connect(self, ip):
         last_ip.append(ip)
         Instance.i = ip
+        if self.search_file("chain_spam.exe", me):
+            if len(me.map) % 2 == 0:
+                acc = Bitcoin.users[me.ip]
+                total_spam = me.spam_c
+                to_collect = total_spam * 50
+                acc.balance += to_collect
+                print("Collected {}$ from spam.".format(to_collect))
         print("Connected.")
 
     def search_file(self, filename, obj=None):
@@ -1027,7 +1033,7 @@ class PC:
                 self.execute("access {} {}".format(user,password))
                 print("Account accessed with bit_access.exe. You can now exit.")
                 return
-            if self.search_file("run4hackz.exe", me).active:
+            if self.search_file("run4hackz.exe", me) and self.search_file("run4hackz.exe", me).active:
                 self.execute("access {} {}".format(user, password))
                 print("Account accessed with run4hackz.exe")
                 return
