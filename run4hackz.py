@@ -2,6 +2,7 @@ import random
 import re
 import copy
 import pickle
+import time
 
 
 #TODO add the run4hackz to the tutorial as explanation of the games' objective
@@ -562,6 +563,23 @@ class PC:
         PC.all_pc.append(self)
 
     def disconnect(self):
+        if self.search_file("run4hackz.exe", me) and self.search_file("run4hackz.exe", me).active:
+            print("[ERROR]")
+            time.sleep(1)
+            input(self.bash)
+            time.sleep(0.6)
+            print("[Cannot execute command]")
+            input("#> ")
+            time.sleep(0.4)
+            print("I")
+            time.sleep(2)
+            print("am")
+            time.sleep(2)
+            print("*You hear a noise behind you*")
+            time.sleep(2)
+            print("You lose")
+            time.sleep(3)
+            exit("Died by drone shot")
         global last_ip
         if len(last_ip) > 0:
             del last_ip[-1]
@@ -687,7 +705,7 @@ class PC:
                     return
                 ult.active = True
                 print("run4hackz.exe successfully activated.")
-                print("You won!!")
+                print("Now try to hack someone!")
 
         elif command[0] == "connect":
             ip = command[1]
